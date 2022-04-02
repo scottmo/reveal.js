@@ -1302,6 +1302,10 @@ $controlsArrowAngleActive: 36deg;
  * OVERVIEW
  *********************************************/
 
+ .reveal.overview.scrollable {
+	overflow: scroll;
+ }
+
 .reveal.overview {
 	perspective-origin: 50% 50%;
 	perspective: 700px;

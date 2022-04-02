@@ -15,6 +15,7 @@ export default class Overview {
 
 		this.onSlideClicked = this.onSlideClicked.bind( this );
 
+		this.scrollable = false;
 	}
 
 	/**
@@ -27,6 +28,8 @@ export default class Overview {
 		if( this.Reveal.getConfig().overview && !this.isActive() ) {
 
 			this.active = true;
+
+			this.scrollable = this.Reveal.isSpeakerNotes() && this.Reveal.getConfig().speakerOverviewScrollable;
 
 			this.Reveal.getRevealElement().classList.add( 'overview' );
 
@@ -74,6 +77,10 @@ export default class Overview {
 				}
 			});
 
+			if ( this.scrollable ) {
+				this.Reveal.getRevealElement().classList.add( 'scrollable' );
+				this.Reveal.toggleScrollPrevention( false );
+			}
 		}
 
 	}
@@ -121,15 +128,27 @@ export default class Overview {
 		const vmin = Math.min( window.innerWidth, window.innerHeight );
 		const scale = Math.max( vmin / 5, 150 ) / vmin;
 		const indices = this.Reveal.getIndices();
+		const translates = {
+			x: -indices.h * this.overviewSlideWidth,
+			y: -indices.v * this.overviewSlideHeight,
+		};
 
-		this.Reveal.transformSlides( {
-			overview: [
-				'scale('+ scale +')',
-				'translateX('+ ( -indices.h * this.overviewSlideWidth ) +'px)',
-				'translateY('+ ( -indices.v * this.overviewSlideHeight ) +'px)'
-			].join( ' ' )
-		} );
+		if( this.scrollable ) {
+			this.Reveal.transformSlides( {
+				overview: 'scale('+ scale +')'
+			} );
+			this.Reveal.getRevealElement().scrollLeft = -1 * translates.x * scale;
+			this.Reveal.getRevealElement().scrollTop = -1 * translates.y * scale;
 
+		} else {
+			this.Reveal.transformSlides( {
+				overview: [
+					'scale('+ scale +')',
+					'translateX('+ translates.x +'px)',
+					'translateY('+ translates.y +'px)'
+				].join( ' ' )
+			} );
+		}
 	}
 
 	/**
@@ -187,6 +206,10 @@ export default class Overview {
 				}
 			});
 
+			if ( this.scrollable ) {
+				this.Reveal.getRevealElement().classList.remove( 'scrollable' );
+				this.Reveal.toggleScrollPrevention( true );
+			}
 		}
 	}
 
@@ -238,7 +261,9 @@ export default class Overview {
 
 			if( element && !element.classList.contains( 'disabled' ) ) {
 
-				this.deactivate();
+				if (!this.scrollable) {
+					this.deactivate();
+				}
 
 				if( element.nodeName.match( /section/gi ) ) {
 					let h = parseInt( element.getAttribute( 'data-index-h' ), 10 ),

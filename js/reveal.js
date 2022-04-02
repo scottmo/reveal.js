@@ -96,6 +96,9 @@ export default function( revealElement, options ) {
 		autoSlideStartTime = -1,
 		autoSlidePaused = false,
 
+		// Flag to enable scroll prevention
+		shouldPreventScroll = true,
+
 		// Controllers for different aspects of our presentation. They're
 		// all given direct references to this Reveal instance since there
 		// may be multiple presentations running in parallel.
@@ -371,12 +374,17 @@ export default function( revealElement, options ) {
 	function setupScrollPrevention() {
 
 		setInterval( () => {
-			if( dom.wrapper.scrollTop !== 0 || dom.wrapper.scrollLeft !== 0 ) {
-				dom.wrapper.scrollTop = 0;
-				dom.wrapper.scrollLeft = 0;
+			if( shouldPreventScroll ) {
+				if( dom.wrapper.scrollTop !== 0 || dom.wrapper.scrollLeft !== 0 ) {
+					dom.wrapper.scrollTop = 0;
+					dom.wrapper.scrollLeft = 0;
+				}
 			}
 		}, 1000 );
+	}
 
+	function toggleScrollPrevention( override ) {
+		shouldPreventScroll = override;
 	}
 
 	/**
@@ -2624,6 +2632,9 @@ export default function( revealElement, options ) {
 
 		// Toggles the auto slide mode on/off
 		toggleAutoSlide,
+
+		// Toggles scroll prevention
+		toggleScrollPrevention,
 
 		// Slide navigation checks
 		isFirstSlide,
